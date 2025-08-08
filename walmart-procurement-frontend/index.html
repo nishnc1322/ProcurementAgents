@@ -1,0 +1,1818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Walmart Procurement Agent Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: white;
+            border-right: 1px solid #e1e8ed;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #e1e8ed;
+            background: linear-gradient(135deg, #0071ce, #004c91);
+            color: white;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .logo::before {
+            content: "⭐";
+            margin-right: 10px;
+            font-size: 1.8rem;
+        }
+
+        .nav-menu {
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: #f8f9fa;
+            color: #0071ce;
+            border-left-color: #0071ce;
+        }
+
+        .nav-icon {
+            margin-right: 12px;
+            font-size: 1.2rem;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            min-height: 100vh;
+            background: #f5f7fa;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e1e8ed;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 12px;
+            min-width: 300px;
+        }
+
+        .search-box input {
+            border: none;
+            background: none;
+            outline: none;
+            flex: 1;
+            padding: 4px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #0071ce, #004c91);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,113,206,0.3);
+        }
+
+        .btn-outline {
+            background: white;
+            color: #0071ce;
+            border: 1px solid #0071ce;
+        }
+
+        .content-area {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #1a202c;
+        }
+
+        .master-agent {
+            background: linear-gradient(135deg, #0071ce, #004c91);
+            border-radius: 16px;
+            padding: 30px;
+            color: white;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0,113,206,0.2);
+        }
+
+        .master-agent-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .master-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .master-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin-right: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+        }
+
+        .master-details h2 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .master-badge {
+            background: #ffc220;
+            color: #1a202c;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+
+        .master-description {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .master-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-master {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-master:hover {
+            background: rgba(255,255,255,0.3);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .agent-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .agent-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+            border-color: #0071ce;
+        }
+
+        .agent-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .agent-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-right: 16px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .agent-info h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #1a202c;
+        }
+
+        .agent-title {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .agent-config {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .agent-config:hover {
+            background: #0071ce;
+            color: white;
+            border-color: #0071ce;
+        }
+
+        .agent-description {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .agent-capabilities {
+            margin-bottom: 16px;
+        }
+
+        .capabilities-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 8px;
+        }
+
+        .capability-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .capability-tag {
+            background: #f0f8ff;
+            color: #0071ce;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .agent-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 16px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .status-online {
+            background: #10b981;
+        }
+
+        .chat-btn {
+            background: #0071ce;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chat-btn:hover {
+            background: #005bb5;
+        }
+
+        .network-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0071ce, #004c91);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,113,206,0.3);
+            transition: all 0.3s ease;
+            font-size: 1.5rem;
+            z-index: 1000;
+        }
+
+        .network-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0,113,206,0.4);
+        }
+
+        /* ORCHESTRATION OVERLAY STYLES */
+        .orchestration-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            z-index: 10000;
+            display: none;
+            overflow: hidden;
+        }
+
+        .orchestration-overlay.active {
+            display: block;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .close-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.1);
+        }
+
+        .orchestration-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .orchestration-header {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            z-index: 100;
+        }
+
+        .orchestration-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #0071ce, #00a8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .orchestration-header p {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            font-weight: 300;
+        }
+
+        .network-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .agent-node {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 3px solid transparent;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .agent-node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .agent-node.master {
+            width: 160px;
+            height: 160px;
+            border-color: #0071ce;
+            box-shadow: 0 0 30px rgba(0, 113, 206, 0.4);
+        }
+
+        .agent-node.orchestrator {
+            width: 140px;
+            height: 140px;
+            border-color: #ff6b6b;
+            box-shadow: 0 0 25px rgba(255, 107, 107, 0.4);
+        }
+
+        .agent-icon {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+        }
+
+        .agent-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: center;
+            color: white;
+        }
+
+        .agent-status-dot {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 3px solid white;
+        }
+
+        .status-busy { background: #f59e0b; }
+        .status-offline { background: #ef4444; }
+
+        .connection-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform-origin: left center;
+            z-index: 1;
+        }
+
+        .connection-line.primary {
+            background: linear-gradient(90deg, transparent, rgba(0, 113, 206, 0.6), transparent);
+            height: 3px;
+        }
+
+        .connection-line.orchestration {
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 107, 0.6), transparent);
+            height: 3px;
+        }
+
+        .data-source {
+            position: absolute;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            color: white;
+            font-size: 0.8rem;
+            backdrop-filter: blur(5px);
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .legend h3 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        .legend-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 50%;
+        }
+
+        .agent-details {
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            width: 350px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 25px;
+            color: white;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .agent-details.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .detail-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .detail-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+        }
+
+        .detail-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .detail-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        .detail-section {
+            margin-bottom: 20px;
+        }
+
+        .detail-section h4 {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            color: #0071ce;
+        }
+
+        .capability-list {
+            list-style: none;
+        }
+
+        .capability-list li {
+            padding: 5px 0;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .capability-list li::before {
+            content: "▸";
+            color: #0071ce;
+            margin-right: 8px;
+        }
+
+        .trigger-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(45deg, #0071ce, #00a8ff);
+            border: 3px solid white;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            box-shadow: 0 6px 25px rgba(0, 113, 206, 0.5);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .trigger-button:hover {
+            transform: scale(1.15);
+            box-shadow: 0 8px 30px rgba(0, 113, 206, 0.7);
+            border-color: #ffc220;
+        }
+
+        .view-toggle {
+            position: absolute;
+            top: 20px;
+            right: 80px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .view-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.1);
+        }
+
+        .view-toggle.active {
+            background: rgba(0, 113, 206, 0.3);
+            border-color: #0071ce;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes lineFlow {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .agent-node.active {
+            animation: pulse 2s infinite;
+        }
+
+        .connection-line::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+            animation: lineFlow 2s infinite;
+        }
+
+        /* Hierarchy View Styles */
+        .hierarchy-view {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 40px;
+        }
+
+        .hierarchy-view.active {
+            display: flex;
+        }
+
+        .hierarchy-level {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            width: 100%;
+        }
+
+        .hierarchy-level.master {
+            margin-bottom: 30px;
+        }
+
+        .hierarchy-level.orchestrator {
+            margin: 30px 0;
+        }
+
+        .hierarchy-level.specialists {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 20px;
+            width: 90%;
+            max-width: 1200px;
+            justify-items: center;
+        }
+
+        .hierarchy-arrow {
+            font-size: 2rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .network-container.hidden {
+            display: none;
+        }
+
+        .hierarchy-view .agent-node {
+            position: relative;
+            transform: none !important;
+            top: auto !important;
+            left: auto !important;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .agents-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .agent-node {
+                width: 80px;
+                height: 80px;
+            }
+
+            .agent-node.master {
+                width: 100px;
+                height: 100px;
+            }
+
+            .agent-node.orchestrator {
+                width: 90px;
+                height: 90px;
+            }
+
+            .agent-icon {
+                font-size: 1.5rem;
+            }
+
+            .agent-name {
+                font-size: 0.7rem;
+            }
+
+            .agent-details {
+                width: 300px;
+                right: 10px;
+            }
+
+            .orchestration-header h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">IPT AgentHub</div>
+        </div>
+        <nav class="nav-menu">
+            <a href="#" class="nav-item active">
+                <span class="nav-icon">🤖</span>
+                Agents
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">💬</span>
+                Conversations
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">📚</span>
+                Knowledge Base
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">👤</span>
+                Profile
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">⚙️</span>
+                Account
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <header class="header">
+            <div class="header-top">
+                <h1 class="page-title">Agent Management Dashboard</h1>
+                <div class="header-actions">
+                    <div class="search-box">
+                        <span>🔍</span>
+                        <input type="text" placeholder="Search agents...">
+                    </div>
+                    <button class="btn btn-outline">📝 Admin Mode</button>
+                    <button class="btn">➕ Create Agent</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <!-- Master Agent Section -->
+            <div class="section">
+                <div class="master-agent">
+                    <div class="master-agent-content">
+                        <div class="master-info">
+                            <div class="master-avatar">🏪</div>
+                            <div class="master-details">
+                                <div class="master-badge">👑 MASTER AGENT</div>
+                                <h2>Wally</h2>
+                                <div class="master-description">
+                                    Master AI coordinator that intelligently routes requests to specialized agents and coordinates responses as an expert procurement specialist
+                                </div>
+                            </div>
+                        </div>
+                        <div class="master-actions">
+                            <button class="btn-master" onclick="openChat('wally')">
+                                ⚡ Chat with Wally
+                            </button>
+                            <button class="btn-master" onclick="configureAgent('wally')">
+                                📝 Edit Master
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Specialized Agents -->
+            <div class="section">
+                <h2 class="section-title">Specialized Agents</h2>
+                <div class="agents-grid" id="agentsGrid">
+                    <!-- Agents will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trigger Button -->
+    <button class="trigger-button" onclick="openOrchestration()" title="View Agent Orchestration Network">
+        🕸️
+    </button>
+
+    <!-- Orchestration Overlay -->
+    <div class="orchestration-overlay" id="orchestrationOverlay">
+        <button type="button" class="close-button" onclick="closeOrchestration();">×</button>
+        <button type="button" class="view-toggle" id="viewToggle" onclick="toggleView();">📊</button>
+        
+        <div class="orchestration-header">
+            <h1>Agent Orchestration Hub</h1>
+            <p>Walmart Procurement Intelligence Network</p>
+        </div>
+
+        <div class="orchestration-container">
+            <!-- Network/Mesh View -->
+            <div class="network-container" id="networkContainer">
+                <!-- Wally - Master Interface (Top) -->
+                <div class="agent-node master" id="wally" 
+                     style="background: linear-gradient(135deg, #0071ce, #004c91); top: 10%; left: 50%; transform: translateX(-50%);"
+                     onclick="showAgentDetails('wally')">
+                    <div class="agent-icon">🏪</div>
+                    <div class="agent-name">Wally</div>
+                    <div class="agent-status-dot status-online"></div>
+                </div>
+
+                <!-- Butler - Central Orchestrator -->
+                <div class="agent-node orchestrator" id="butler"
+                     style="background: linear-gradient(135deg, #ff6b6b, #ee5a52); top: 50%; left: 50%; transform: translate(-50%, -50%);"
+                     onclick="showAgentDetails('butler')">
+                    <div class="agent-icon">🤖</div>
+                    <div class="agent-name">Butler</div>
+                    <div class="agent-status-dot status-online"></div>
+                </div>
+
+                <!-- CatM -->
+                <div class="agent-node" id="catm"
+                     style="background: linear-gradient(135deg, #17a2b8, #138496); top: 25%; left: 20%; transform: translate(-50%, -50%);"
+                     onclick="showAgentDetails('catm')">
+                    <div class="agent-icon">📊</div>
+                    <div class="agent-name">CatM</div>
+                    <div class="agent-status-dot status-online"></div>
+                </div>
+
+                <!-- Starsource -->
+                <div class="agent-node" id="starsource"
+                     style="background: linear-gradient(135deg, #ffc107, #e0a800); top: 25%; left: 80%; transform: translate(-50%, -50%);"
+                     onclick="showAgentDetails('starsource')">
+                    <div class="agent-icon">🌟</div>
+                    <div class="agent-name">Starsource</div>
+                    <div class="agent-status-dot status-online"></div>
+                </div>
+
+                <!-- Spender -->
+                <div class="agent-node" id="spender"
+                     style="background: linear-gradient(135deg, #fd7e14, #e55a4f); top: 50%; left: 15%; transform: translate(-50%, -50%);"
+                     onclick="showAgentDetails('spender')">
+                    <div class="agent-icon">💰</div>
+                    <div class="agent-name">Spender</div>
+                    <div class="agent-status-dot status-online"></div>
+                </div>
+
+                <!-- Compliance -->
+                <div class="agent-node" id="compliance"
+                     style="background: linear-gradient(135deg, #20c997, #17a085); top: 50%; left: 85%; transform: translate(-50%, -50%);"
+                     onclick="showAgentDetails('compliance')">
+                    <div class="agent-icon">⚖️</div>
+                    <div class="agent-name">Compliance</div>
+                    <div class="agent-status-dot status-online"></div>
+                </div>
+
+                <!-- Policy -->
+                <div class="agent-node" id="policy"
+                     style="background: linear-gradient(135deg, #e83e8c, #d91a72); top: 75%; left: 20%; transform: translate(-50%, -50%);"
+                     onclick="showAgentDetails('policy')">
+                    <div class="agent-icon">📜</div>
+                    <div class="agent-name">Policy</div>
+                    <div class="agent-status-dot status-online"></div>
+                </div>
+
+                <!-- Contra -->
+                <div class="agent-node" id="contra"
+                     style="background: linear-gradient(135deg, #6610f2, #520dc2); top: 75%; left: 80%; transform: translate(-50%, -50%);"
+                     onclick="showAgentDetails('contra')">
+                    <div class="agent-icon">📋</div>
+                    <div class="agent-name">Contra</div>
+                    <div class="agent-status-dot status-online"></div>
+                </div>
+
+                <!-- Professor -->
+                <div class="agent-node" id="professor"
+                     style="background: linear-gradient(135deg, #6f42c1, #59359a); top: 75%; left: 50%; transform: translate(-50%, -50%);"
+                     onclick="showAgentDetails('professor')">
+                    <div class="agent-icon">🎓</div>
+                    <div class="agent-name">Professor</div>
+                    <div class="agent-status-dot status-online"></div>
+                </div>
+
+                <!-- Data Sources -->
+                <div class="data-source" style="top: 15%; left: 85%;">SQL Database</div>
+                <div class="data-source" style="top: 85%; left: 85%;">Vector RAG</div>
+                <div class="data-source" style="top: 85%; left: 15%;">Live Web Access</div>
+            </div>
+
+            <!-- Hierarchy View -->
+            <div class="hierarchy-view" id="hierarchyView">
+                <!-- Master Level -->
+                <div class="hierarchy-level master">
+                    <div class="agent-node master" onclick="showAgentDetails('wally')"
+                         style="background: linear-gradient(135deg, #0071ce, #004c91);">
+                        <div class="agent-icon">🏪</div>
+                        <div class="agent-name">Wally</div>
+                        <div class="agent-status-dot status-online"></div>
+                    </div>
+                </div>
+
+                <div class="hierarchy-arrow">⬇️</div>
+
+                <!-- Orchestrator Level -->
+                <div class="hierarchy-level orchestrator">
+                    <div class="agent-node orchestrator" onclick="showAgentDetails('butler')"
+                         style="background: linear-gradient(135deg, #ff6b6b, #ee5a52);">
+                        <div class="agent-icon">🤖</div>
+                        <div class="agent-name">Butler</div>
+                        <div class="agent-status-dot status-online"></div>
+                    </div>
+                </div>
+
+                <div class="hierarchy-arrow">⬇️</div>
+
+                <!-- Specialists Level -->
+                <div class="hierarchy-level specialists">
+                    <div class="agent-node" onclick="showAgentDetails('catm')"
+                         style="background: linear-gradient(135deg, #17a2b8, #138496);">
+                        <div class="agent-icon">📊</div>
+                        <div class="agent-name">CatM</div>
+                        <div class="agent-status-dot status-online"></div>
+                    </div>
+
+                    <div class="agent-node" onclick="showAgentDetails('starsource')"
+                         style="background: linear-gradient(135deg, #ffc107, #e0a800);">
+                        <div class="agent-icon">🌟</div>
+                        <div class="agent-name">Starsource</div>
+                        <div class="agent-status-dot status-online"></div>
+                    </div>
+
+                    <div class="agent-node" onclick="showAgentDetails('spender')"
+                         style="background: linear-gradient(135deg, #fd7e14, #e55a4f);">
+                        <div class="agent-icon">💰</div>
+                        <div class="agent-name">Spender</div>
+                        <div class="agent-status-dot status-online"></div>
+                    </div>
+
+                    <div class="agent-node" onclick="showAgentDetails('compliance')"
+                         style="background: linear-gradient(135deg, #20c997, #17a085);">
+                        <div class="agent-icon">⚖️</div>
+                        <div class="agent-name">Compliance</div>
+                        <div class="agent-status-dot status-online"></div>
+                    </div>
+
+                    <div class="agent-node" onclick="showAgentDetails('policy')"
+                         style="background: linear-gradient(135deg, #e83e8c, #d91a72);">
+                        <div class="agent-icon">📜</div>
+                        <div class="agent-name">Policy</div>
+                        <div class="agent-status-dot status-online"></div>
+                    </div>
+
+                    <div class="agent-node" onclick="showAgentDetails('contra')"
+                         style="background: linear-gradient(135deg, #6610f2, #520dc2);">
+                        <div class="agent-icon">📋</div>
+                        <div class="agent-name">Contra</div>
+                        <div class="agent-status-dot status-online"></div>
+                    </div>
+
+                    <div class="agent-node" onclick="showAgentDetails('professor')"
+                         style="background: linear-gradient(135deg, #6f42c1, #59359a);">
+                        <div class="agent-icon">🎓</div>
+                        <div class="agent-name">Professor</div>
+                        <div class="agent-status-dot status-online"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend">
+            <h3>Agent Types</h3>
+            <div class="legend-item">
+                <div class="legend-icon" style="background: linear-gradient(135deg, #0071ce, #004c91);"></div>
+                Master Interface
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon" style="background: linear-gradient(135deg, #ff6b6b, #ee5a52);"></div>
+                Orchestrator
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon" style="background: linear-gradient(135deg, #17a2b8, #138496);"></div>
+                Specialist Agent
+            </div>
+        </div>
+
+        <!-- Agent Details Panel -->
+        <div class="agent-details" id="agentDetails">
+            <div class="detail-header">
+                <div class="detail-icon" id="detailIcon">🤖</div>
+                <div>
+                    <div class="detail-title" id="detailTitle">Agent Name</div>
+                    <div class="detail-subtitle" id="detailSubtitle">Agent Role</div>
+                </div>
+            </div>
+            
+            <div class="detail-section">
+                <h4>Core Capabilities</h4>
+                <ul class="capability-list" id="detailCapabilities">
+                    <li>Capability 1</li>
+                    <li>Capability 2</li>
+                </ul>
+            </div>
+
+            <div class="detail-section">
+                <h4>Platform & Access</h4>
+                <p id="detailPlatform">Platform information</p>
+            </div>
+
+            <div class="detail-section">
+                <h4>Collaboration Pattern</h4>
+                <p id="detailCollaboration">How this agent works with others</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuration Modal Container -->
+    <div id="configModalContainer"></div>
+
+    <script>
+        // Agent configuration data
+        const agentData = {
+            wally: {
+                icon: '🏪',
+                title: 'Wally',
+                subtitle: 'Customer Experience Specialist',
+                capabilities: [
+                    'User Interface Excellence',
+                    'Query Reception & Routing',
+                    'Response Presentation',
+                    'Customer Experience Focus',
+                    'Intelligent Routing Decisions'
+                ],
+                platform: 'Claude Sonnet 4 - Master Interface',
+                collaboration: 'Routes complex queries to Butler for orchestration, handles simple queries directly. Provides executive-friendly presentation of all specialist outputs.'
+            },
+            butler: {
+                icon: '🤖',
+                title: 'Butler',
+                subtitle: 'AI Orchestrator & Workflow Manager',
+                capabilities: [
+                    'Multi-Agent Orchestration',
+                    'Workflow Design (Single/Sequential/Parallel/Hybrid)',
+                    'Query Analysis & Routing',
+                    'Response Synthesis',
+                    'Resource Optimization'
+                ],
+                platform: 'LangGraph Supervisor Framework',
+                collaboration: 'Central orchestrator managing all specialist agents. Analyzes query complexity and coordinates appropriate agent workflows.'
+            },
+            catm: {
+                icon: '📊',
+                title: 'CatM',
+                subtitle: 'Category Management Strategist',
+                capabilities: [
+                    'End-to-End Category Strategy',
+                    '19-Step Framework Execution',
+                    'Market Analysis & Intelligence',
+                    'Supplier Relationship Strategy',
+                    'Risk & Sustainability Assessment'
+                ],
+                platform: 'Gemini 2.0 Flash',
+                collaboration: 'Works with Spender for data foundation, Starsource for execution, Vector for contract validation, Policy for compliance.'
+            },
+            starsource: {
+                icon: '🌟',
+                title: 'Starsource',
+                subtitle: 'PhD-Level Strategic Sourcing',
+                capabilities: [
+                    'Global Supplier Identification',
+                    'Complex Multi-Cultural Negotiations',
+                    'Supply Network Optimization',
+                    'Advanced Cost Modeling',
+                    'International Trade Strategy'
+                ],
+                platform: 'Gemini 2.0 Flash',
+                collaboration: 'Implements sourcing tactics based on CatM strategy, uses Spender data for decisions, works with Compliance for legal review.'
+            },
+            spender: {
+                icon: '💰',
+                title: 'Spender',
+                subtitle: 'Supplier & Contract Analytics',
+                capabilities: [
+                    'Supplier Performance Analysis',
+                    'Contract Utilization Studies',
+                    'Spend Trend Analysis',
+                    'Real-time SQL Database Access',
+                    'Risk Concentration Assessment'
+                ],
+                platform: 'Gemini 2.0 Flash + SQL Database',
+                collaboration: 'Provides data foundation for CatM strategy, historical performance for Starsource, cross-references with Contra contract terms.'
+            },
+            compliance: {
+                icon: '⚖️',
+                title: 'Compliance',
+                subtitle: 'Legal Assistant & MSA Templates',
+                capabilities: [
+                    'MSA Template Application',
+                    'Contract Redlining Analysis',
+                    'Legal Risk Assessment',
+                    'Regulatory Compliance',
+                    'Negotiation Strategy Development'
+                ],
+                platform: 'Claude Sonnet 4',
+                collaboration: 'Reviews contracts based on Contra precedents, ensures Policy compliance, validates Starsource international agreements.'
+            },
+            policy: {
+                icon: '📜',
+                title: 'Policy',
+                subtitle: 'Policy Compliance Specialist',
+                capabilities: [
+                    'Corporate Policy Interpretation',
+                    'Compliance Guidance',
+                    'Vector RAG Policy Access',
+                    'Risk Assessment',
+                    'Exception Analysis'
+                ],
+                platform: 'Claude Sonnet 4 + Vector RAG',
+                collaboration: 'Ensures all agent recommendations comply with corporate policies, validates CatM strategies, reviews Compliance legal analysis.'
+            },
+            contra: {
+                icon: '📋',
+                title: 'Contra',
+                subtitle: 'B2B Contract Research Specialist',
+                capabilities: [
+                    'Contract Precedent Research',
+                    'Comparative Contract Analysis',
+                    'Historical Trend Analysis',
+                    'Vector RAG Contract Database',
+                    'Negotiation Intelligence'
+                ],
+                platform: 'Claude Sonnet 4 + Vector RAG',
+                collaboration: 'Provides precedent research for Compliance analysis, validates contract terms for Starsource negotiations, supports CatM strategy.'
+            },
+            professor: {
+                icon: '🎓',
+                title: 'Professor',
+                subtitle: 'Research Intelligence Specialist',
+                capabilities: [
+                    'Comprehensive Market Research',
+                    'Real-time Web Intelligence',
+                    'Academic Literature Reviews',
+                    'Industry Analysis',
+                    'Competitive Intelligence'
+                ],
+                platform: 'Perplexity Deep Research + Live Web Access',
+                collaboration: 'Provides market intelligence for CatM strategy, industry research for Starsource sourcing, regulatory research for Compliance.'
+            }
+        };
+
+        let currentAgent = null;
+        let currentView = 'network'; // 'network' or 'hierarchy'
+
+        function openOrchestration() {
+            console.log('Opening orchestration...'); // Debug
+            const overlay = document.getElementById('orchestrationOverlay');
+            if (overlay) {
+                overlay.classList.add('active');
+                console.log('Overlay opened, currentView:', currentView); // Debug
+                
+                if (currentView === 'network') {
+                    drawConnections();
+                }
+                
+                // Add entrance animation
+                setTimeout(() => {
+                    document.querySelectorAll('.agent-node').forEach((node, index) => {
+                        setTimeout(() => {
+                            node.style.opacity = '1';
+                            if (node.style.transform && !node.style.transform.includes('scale')) {
+                                node.style.transform = node.style.transform + ' scale(1)';
+                            }
+                        }, index * 100);
+                    });
+                }, 100);
+            } else {
+                console.error('Overlay element not found!'); // Debug
+            }
+        }
+
+        function closeOrchestration() {
+            console.log('Closing orchestration...'); // Debug
+            const overlay = document.getElementById('orchestrationOverlay');
+            if (overlay) {
+                overlay.classList.remove('active');
+                console.log('Overlay closed'); // Debug
+            } else {
+                console.error('Overlay element not found for closing!'); // Debug
+            }
+            
+            hideAgentDetails();
+            
+            // Reset to network view when closing
+            currentView = 'network';
+            const networkContainer = document.getElementById('networkContainer');
+            const hierarchyView = document.getElementById('hierarchyView');
+            const viewToggle = document.getElementById('viewToggle');
+            
+            if (networkContainer) networkContainer.classList.remove('hidden');
+            if (hierarchyView) hierarchyView.classList.remove('active');
+            if (viewToggle) {
+                viewToggle.innerHTML = '📊';
+                viewToggle.title = 'Switch to Hierarchy View';
+            }
+        }
+
+        function toggleView() {
+            console.log('Toggle view clicked, current view:', currentView); // Debug
+            
+            const networkContainer = document.getElementById('networkContainer');
+            const hierarchyView = document.getElementById('hierarchyView');
+            const viewToggle = document.getElementById('viewToggle');
+            
+            console.log('Elements found:', {
+                networkContainer: !!networkContainer,
+                hierarchyView: !!hierarchyView,
+                viewToggle: !!viewToggle
+            }); // Debug
+            
+            if (currentView === 'network') {
+                // Switch to hierarchy
+                console.log('Switching to hierarchy view...'); // Debug
+                if (networkContainer) {
+                    networkContainer.style.display = 'none';
+                    console.log('Network container hidden'); // Debug
+                }
+                if (hierarchyView) {
+                    hierarchyView.style.display = 'flex';
+                    console.log('Hierarchy view shown'); // Debug
+                }
+                if (viewToggle) {
+                    viewToggle.innerHTML = '🕸️';
+                    viewToggle.title = 'Switch to Network View';
+                    console.log('Toggle button updated to mesh icon'); // Debug
+                }
+                currentView = 'hierarchy';
+            } else {
+                // Switch to network
+                console.log('Switching to network view...'); // Debug
+                if (networkContainer) {
+                    networkContainer.style.display = 'flex';
+                    console.log('Network container shown'); // Debug
+                }
+                if (hierarchyView) {
+                    hierarchyView.style.display = 'none';
+                    console.log('Hierarchy view hidden'); // Debug
+                }
+                if (viewToggle) {
+                    viewToggle.innerHTML = '📊';
+                    viewToggle.title = 'Switch to Hierarchy View';
+                    console.log('Toggle button updated to chart icon'); // Debug
+                }
+                currentView = 'network';
+                // Redraw connections
+                setTimeout(() => drawConnections(), 100);
+            }
+            
+            // Hide agent details when switching views
+            hideAgentDetails();
+            console.log('View switched to:', currentView); // Debug
+        }
+
+        function openOrchestration() {
+            document.getElementById('orchestrationOverlay').classList.add('active');
+            drawConnections();
+            // Add some entrance animation
+            setTimeout(() => {
+                document.querySelectorAll('.agent-node').forEach((node, index) => {
+                    setTimeout(() => {
+                        node.style.opacity = '1';
+                        node.style.transform = node.style.transform + ' scale(1)';
+                    }, index * 100);
+                });
+            }, 100);
+        }
+
+        function closeOrchestration() {
+            document.getElementById('orchestrationOverlay').classList.remove('active');
+            hideAgentDetails();
+        }
+
+        function drawConnections() {
+            const container = document.getElementById('networkContainer');
+            
+            // Clear existing connections
+            const existingLines = container.querySelectorAll('.connection-line');
+            existingLines.forEach(line => line.remove());
+
+            // Primary flow: Wally -> Butler
+            drawConnection('wally', 'butler', 'primary');
+            
+            // Butler to all specialists
+            const specialists = ['catm', 'starsource', 'spender', 'compliance', 'policy', 'contra', 'professor'];
+            specialists.forEach(specialist => {
+                drawConnection('butler', specialist, 'orchestration');
+            });
+
+            // Key collaboration lines
+            drawConnection('catm', 'spender', 'collaboration');
+            drawConnection('spender', 'contra', 'collaboration');
+            drawConnection('contra', 'compliance', 'collaboration');
+            drawConnection('compliance', 'policy', 'collaboration');
+        }
+
+        function drawConnection(fromId, toId, type = 'default') {
+            const fromElement = document.getElementById(fromId);
+            const toElement = document.getElementById(toId);
+            
+            if (!fromElement || !toElement) return;
+
+            const fromRect = fromElement.getBoundingClientRect();
+            const toRect = toElement.getBoundingClientRect();
+            const containerRect = document.getElementById('networkContainer').getBoundingClientRect();
+
+            const fromX = fromRect.left + fromRect.width / 2 - containerRect.left;
+            const fromY = fromRect.top + fromRect.height / 2 - containerRect.top;
+            const toX = toRect.left + toRect.width / 2 - containerRect.left;
+            const toY = toRect.top + toRect.height / 2 - containerRect.top;
+
+            const distance = Math.sqrt(Math.pow(toX - fromX, 2) + Math.pow(toY - fromY, 2));
+            const angle = Math.atan2(toY - fromY, toX - fromX);
+
+            const line = document.createElement('div');
+            line.className = `connection-line ${type}`;
+            line.style.width = distance + 'px';
+            line.style.left = fromX + 'px';
+            line.style.top = fromY + 'px';
+            line.style.transform = `rotate(${angle}rad)`;
+
+            document.getElementById('networkContainer').appendChild(line);
+        }
+
+        function showAgentDetails(agentId) {
+            const agent = agentData[agentId];
+            if (!agent) return;
+
+            currentAgent = agentId;
+
+            // Update details panel
+            document.getElementById('detailIcon').textContent = agent.icon;
+            document.getElementById('detailTitle').textContent = agent.title;
+            document.getElementById('detailSubtitle').textContent = agent.subtitle;
+            document.getElementById('detailPlatform').textContent = agent.platform;
+            document.getElementById('detailCollaboration').textContent = agent.collaboration;
+
+            // Update capabilities
+            const capabilityList = document.getElementById('detailCapabilities');
+            capabilityList.innerHTML = agent.capabilities.map(cap => `<li>${cap}</li>`).join('');
+
+            // Show details panel
+            document.getElementById('agentDetails').classList.add('active');
+
+            // Highlight the selected agent
+            document.querySelectorAll('.agent-node').forEach(node => {
+                node.classList.remove('active');
+            });
+            document.getElementById(agentId).classList.add('active');
+        }
+
+        function hideAgentDetails() {
+            const detailsPanel = document.getElementById('agentDetails');
+            if (detailsPanel) {
+                detailsPanel.classList.remove('active');
+            }
+            
+            // Remove active class from all agent nodes
+            document.querySelectorAll('.agent-node').forEach(node => {
+                node.classList.remove('active');
+            });
+            currentAgent = null;
+        }
+
+        // Close details when clicking outside or pressing Escape
+        document.addEventListener('click', function(e) {
+            const detailsPanel = document.getElementById('agentDetails');
+            const overlay = document.getElementById('orchestrationOverlay');
+            
+            // If clicking outside the details panel but inside the overlay
+            if (overlay && overlay.classList.contains('active') && 
+                detailsPanel && detailsPanel.classList.contains('active') &&
+                !detailsPanel.contains(e.target) && 
+                !e.target.closest('.agent-node')) {
+                hideAgentDetails();
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const overlay = document.getElementById('orchestrationOverlay');
+                if (overlay && overlay.classList.contains('active')) {
+                    if (currentAgent) {
+                        hideAgentDetails();
+                    } else {
+                        closeOrchestration();
+                    }
+                }
+            }
+        });
+
+        // Initialize agent nodes with entrance animation setup
+        document.addEventListener('DOMContentLoaded', function() {
+            renderAgents();
+            loadConfigurationModal();
+            
+            // Set initial opacity for smooth entrance
+            setTimeout(() => {
+                document.querySelectorAll('.agent-node').forEach(node => {
+                    if (node) {
+                        node.style.opacity = '0';
+                        node.style.transform = node.style.transform + ' scale(0.8)';
+                    }
+                });
+            }, 100);
+        });
+
+        // Agent data for dashboard cards
+        const agents = [
+            {
+                id: 'butler',
+                name: 'Butler',
+                title: 'AI Assistant & Helper',
+                description: 'General-purpose AI assistant that helps with various tasks and provides support across different procurement activities.',
+                avatar: '🤖',
+                color: '#28a745',
+                capabilities: ['Task Assistance', 'General Queries', 'Process Guidance', 'Documentation'],
+                status: 'online'
+            },
+            {
+                id: 'catm',
+                name: 'CatM',
+                title: 'Category Management Specialist',
+                description: 'Expert in category strategy, market analysis, and supplier performance optimization for specific product categories.',
+                avatar: '📊',
+                color: '#17a2b8',
+                capabilities: ['Category Strategy', 'Market Analysis', 'Supplier Optimization', 'Cost Management'],
+                status: 'online'
+            },
+            {
+                id: 'starsource',
+                name: 'Starsource',
+                title: 'Strategic Sourcing Specialist',
+                description: 'Focuses on strategic supplier identification, global sourcing opportunities, and supply chain optimization.',
+                avatar: '🌟',
+                color: '#ffc107',
+                capabilities: ['Global Sourcing', 'Supplier Identification', 'Supply Chain', 'Risk Assessment'],
+                status: 'online'
+            },
+            {
+                id: 'spender',
+                name: 'Spender',
+                title: 'Analytics & Spend Management',
+                description: 'Specializes in spend analysis, financial modeling, contract utilization, and procurement analytics.',
+                avatar: '💰',
+                color: '#fd7e14',
+                capabilities: ['Spend Analysis', 'Financial Modeling', 'Contract Analytics', 'Performance Metrics'],
+                status: 'online'
+            },
+            {
+                id: 'contra',
+                name: 'Contra',
+                title: 'Contract Research Specialist',
+                description: 'Expert in contract analysis, template creation, negotiation strategies, and legal compliance.',
+                avatar: '📋',
+                color: '#6610f2',
+                capabilities: ['Contract Analysis', 'Template Creation', 'Negotiation', 'Legal Compliance'],
+                status: 'online'
+            },
+            {
+                id: 'policy',
+                name: 'Policy',
+                title: 'Compliance & Governance',
+                description: 'Ensures adherence to procurement policies, regulatory compliance, and governance frameworks.',
+                avatar: '📜',
+                color: '#e83e8c',
+                capabilities: ['Policy Compliance', 'Governance', 'Regulatory Affairs', 'Audit Support'],
+                status: 'online'
+            },
+            {
+                id: 'compliance',
+                name: 'Compliance',
+                title: 'Legal & MSA Templates',
+                description: 'Manages legal aspects of procurement, MSA templates, and ensures regulatory compliance.',
+                avatar: '⚖️',
+                color: '#20c997',
+                capabilities: ['Legal Review', 'MSA Templates', 'Regulatory Compliance', 'Risk Management'],
+                status: 'online'
+            },
+            {
+                id: 'professor',
+                name: 'Professor',
+                title: 'Research & Intelligence',
+                description: 'Provides research insights, market intelligence, and educational content for procurement decisions.',
+                avatar: '🎓',
+                color: '#6f42c1',
+                capabilities: ['Market Research', 'Intelligence Gathering', 'Training', 'Best Practices'],
+                status: 'online'
+            }
+        ];
+
+        function renderAgents() {
+            const grid = document.getElementById('agentsGrid');
+            grid.innerHTML = '';
+
+            agents.forEach(agent => {
+                const agentCard = createAgentCard(agent);
+                grid.appendChild(agentCard);
+            });
+        }
+
+        function createAgentCard(agent) {
+            const card = document.createElement('div');
+            card.className = 'agent-card';
+            card.onclick = (e) => {
+                // Prevent navigation when clicking config button
+                if (!e.target.closest('.agent-config')) {
+                    openChat(agent.id);
+                }
+            };
+
+            card.innerHTML = `
+                <div class="agent-header">
+                    <div class="agent-avatar" style="background: ${agent.color}">
+                        ${agent.avatar}
+                    </div>
+                    <div class="agent-info">
+                        <h3>${agent.name}</h3>
+                        <div class="agent-title">${agent.title}</div>
+                    </div>
+                    <button class="agent-config" onclick="event.stopPropagation(); configureAgent('${agent.id}')" title="Configure Agent">
+                        ⚙️
+                    </button>
+                </div>
+                <div class="agent-description">
+                    ${agent.description}
+                </div>
+                <div class="agent-capabilities">
+                    <div class="capabilities-title">Core Capabilities</div>
+                    <div class="capability-tags">
+                        ${agent.capabilities.map(cap => `<span class="capability-tag">${cap}</span>`).join('')}
+                    </div>
+                </div>
+                <div class="agent-status">
+                    <div class="status-indicator">
+                        <div class="status-dot status-${agent.status}"></div>
+                        ${agent.status === 'online' ? 'Online' : 'Offline'}
+                    </div>
+                    <button class="chat-btn" onclick="event.stopPropagation(); openChat('${agent.id}')">
+                        💬 Chat
+                    </button>
+                </div>
+            `;
+
+            return card;
+        }
+
+        function openChat(agentId) {
+            // Navigate to dedicated chat page
+            window.location.href = `chat.html?agent=${agentId}`;
+        }
+
+        function configureAgent(agentId) {
+            console.log('Configure agent:', agentId);
+            if (typeof openConfigModal === 'function') {
+                openConfigModal(agentId);
+            } else {
+                console.warn('Configuration modal not loaded yet, retrying...');
+                setTimeout(() => {
+                    if (typeof openConfigModal === 'function') {
+                        openConfigModal(agentId);
+                    } else {
+                        alert(`Configuration modal for ${agentId} is loading. Please try again in a moment.`);
+                    }
+                }, 500);
+            }
+        }
+
+        function toggleNetworkView() {
+            openOrchestration();
+        }
+
+        // Load configuration modal components
+        function loadConfigurationModal() {
+            console.log('Loading configuration modal components...');
+            
+            // Load CSS
+            const cssLink = document.createElement('link');
+            cssLink.rel = 'stylesheet';
+            cssLink.href = 'components/config-modal.css';
+            cssLink.onerror = () => console.warn('Could not load config-modal.css');
+            document.head.appendChild(cssLink);
+            
+            // Load JavaScript
+            const jsScript = document.createElement('script');
+            jsScript.src = 'components/config-modal.js';
+            jsScript.onerror = () => console.warn('Could not load config-modal.js');
+            document.head.appendChild(jsScript);
+            
+            // Load HTML
+            fetch('components/config-modal.html')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    document.getElementById('configModalContainer').innerHTML = html;
+                    console.log('Configuration modal HTML loaded successfully');
+                })
+                .catch(error => {
+                    console.warn('Could not load configuration modal HTML:', error);
+                    createFallbackModal();
+                });
+        }
+
+        function createFallbackModal() {
+            console.log('Creating fallback modal...');
+            document.getElementById('configModalContainer').innerHTML = `
+                <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                            background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                            z-index: 3000; display: none;" id="fallbackModal">
+                    <h3>Configuration Modal</h3>
+                    <p>The advanced configuration modal is not available. Please ensure the component files exist:</p>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        <li>components/config-modal.html</li>
+                        <li>components/config-modal.css</li>
+                        <li>components/config-modal.js</li>
+                    </ul>
+                    <button onclick="document.getElementById('fallbackModal').style.display='none'" 
+                            style="background: #0071ce; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                        Close
+                    </button>
+                </div>
+            `;
+            
+            // Override configureAgent to use fallback
+            window.configureAgent = function(agentId) {
+                document.getElementById('fallbackModal').style.display = 'block';
+            };
+        }
+    </script>
+</body>
+</html>

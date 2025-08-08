@@ -1,0 +1,183 @@
+<!-- Agent Configuration Modal Component -->
+<!-- Include this file in your HTML pages -->
+
+<!-- Modal HTML Structure -->
+<div class="config-modal" id="configModal">
+    <div class="config-modal-content">
+        <!-- Header -->
+        <div class="config-header">
+            <div class="config-agent-info">
+                <div class="config-agent-avatar" id="configAgentAvatar">🤖</div>
+                <div class="config-agent-details">
+                    <h2 id="configAgentName">Agent Name</h2>
+                    <div class="config-agent-title" id="configAgentTitle">Agent Title</div>
+                </div>
+            </div>
+            <button class="config-close" onclick="closeConfigModal()">&times;</button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="config-tabs">
+            <button class="config-tab active" onclick="switchConfigTab('general')">
+                ⚙️ General
+            </button>
+            <button class="config-tab" onclick="switchConfigTab('prompt')">
+                📝 Prompt
+            </button>
+            <button class="config-tab" onclick="switchConfigTab('knowledge')">
+                📚 Knowledge
+            </button>
+            <button class="config-tab" onclick="switchConfigTab('model')">
+                🤖 Model
+            </button>
+        </div>
+
+        <!-- Content Area -->
+        <div class="config-content">
+            <!-- Alert Container -->
+            <div style="padding: 20px 30px 0;">
+                <div class="config-alert" id="configAlert"></div>
+            </div>
+
+            <!-- Loading State -->
+            <div class="config-loading" id="configLoading">
+                <div class="config-spinner"></div>
+                <div>Loading agent configuration...</div>
+            </div>
+
+            <!-- General Tab -->
+            <div class="config-tab-content active" id="general-content">
+                <div class="config-section">
+                    <div class="config-section-title">Basic Information</div>
+                    
+                    <div class="config-form-group">
+                        <label class="config-form-label" for="configNameInput">Agent Name</label>
+                        <input type="text" class="config-form-input" id="configNameInput" placeholder="Enter agent name">
+                    </div>
+
+                    <div class="config-form-group">
+                        <label class="config-form-label" for="configTitleInput">Agent Title</label>
+                        <input type="text" class="config-form-input" id="configTitleInput" placeholder="Enter agent title/role">
+                    </div>
+
+                    <div class="config-form-group">
+                        <label class="config-form-label" for="configDescriptionInput">Description</label>
+                        <textarea class="config-form-textarea" id="configDescriptionInput" placeholder="Describe what this agent does and its primary responsibilities..."></textarea>
+                    </div>
+
+                    <div class="config-form-group">
+                        <label class="config-form-label">Capabilities</label>
+                        <div class="config-capabilities" id="configCapabilities">
+                            <!-- Capabilities will be loaded here -->
+                        </div>
+                        <div class="config-capability-input">
+                            <input type="text" class="config-form-input" id="newCapabilityInput" placeholder="Add new capability">
+                            <button class="config-btn" onclick="addCapability()">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prompt Tab -->
+            <div class="config-tab-content" id="prompt-content">
+                <div class="config-section">
+                    <div class="config-section-title">System Prompt Configuration</div>
+                    
+                    <div class="config-form-group">
+                        <label class="config-form-label" for="configSystemPrompt">System Prompt</label>
+                        <textarea class="config-form-textarea large" id="configSystemPrompt" placeholder="Enter the system prompt that defines how this agent should behave..."></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; margin-top: 20px;">
+                        <button class="config-btn" onclick="savePrompt()">💾 Save Prompt</button>
+                        <button class="config-btn config-btn-secondary" onclick="resetPrompt()">🔄 Reset to Default</button>
+                        <button class="config-btn config-btn-secondary" onclick="previewPrompt()">👁️ Preview</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Knowledge Tab -->
+            <div class="config-tab-content" id="knowledge-content">
+                <!-- File Upload Section -->
+                <div class="config-section">
+                    <div class="config-section-title">Document Upload</div>
+                    <div class="config-knowledge-section">
+                        <div class="config-upload-area" id="fileUploadArea">
+                            <div class="config-upload-icon">📁</div>
+                            <div class="config-upload-text">Drag & drop files here</div>
+                            <div class="config-upload-subtext">or click to browse (PDF, DOC, TXT files)</div>
+                            <input type="file" id="fileUploadInput" style="display: none;" multiple accept=".pdf,.doc,.docx,.txt">
+                        </div>
+                        <div class="config-form-group" style="margin-top: 15px;">
+                            <input type="text" class="config-form-input" id="fileNameInput" placeholder="File description (optional)">
+                            <button class="config-btn" onclick="uploadFiles()" style="margin-top: 10px;">📤 Upload Files</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- URL Sources Section -->
+                <div class="config-section">
+                    <div class="config-section-title">Web Sources</div>
+                    <div class="config-knowledge-section">
+                        <div class="config-url-input">
+                            <input type="text" class="config-form-input" id="urlNameInput" placeholder="Source name">
+                            <input type="url" class="config-form-input" id="urlInput" placeholder="https://example.com">
+                            <button class="config-btn" onclick="addURL()">🌐 Add URL</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Knowledge Sources -->
+                <div class="config-section">
+                    <div class="config-section-title">Current Knowledge Sources</div>
+                    <div class="config-knowledge-list" id="knowledgeSourcesList">
+                        <!-- Knowledge sources will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Model Tab -->
+            <div class="config-tab-content" id="model-content">
+                <div class="config-section">
+                    <div class="config-section-title">Model Configuration</div>
+                    
+                    <div class="config-model-grid">
+                        <div class="config-form-group">
+                            <label class="config-form-label" for="configModel">Model</label>
+                            <select class="config-form-select" id="configModel">
+                                <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
+                                <option value="claude-3-haiku-20240307">Claude 3 Haiku</option>
+                                <option value="claude-3-opus-20240229">Claude 3 Opus</option>
+                            </select>
+                        </div>
+
+                        <div class="config-form-group">
+                            <label class="config-form-label" for="configMaxTokens">Max Tokens</label>
+                            <input type="number" class="config-form-input" id="configMaxTokens" min="1" max="8192" value="4096">
+                        </div>
+
+                        <div class="config-form-group">
+                            <label class="config-form-label" for="configTemperature">Temperature</label>
+                            <input type="number" class="config-form-input" id="configTemperature" min="0" max="1" step="0.1" value="0.7">
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <button class="config-btn" onclick="saveModelSettings()">💾 Save Model Settings</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="config-footer">
+            <div class="config-footer-left">
+                Changes are saved automatically
+            </div>
+            <div class="config-footer-actions">
+                <button class="config-btn config-btn-danger" onclick="resetAgent()">🔄 Reset Agent</button>
+                <button class="config-btn" onclick="saveAllSettings()">💾 Save All Changes</button>
+            </div>
+        </div>
+    </div>
+</div>

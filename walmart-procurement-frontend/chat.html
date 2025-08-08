@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Agent - Walmart Procurement</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .chat-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Left Sidebar - Conversation History */
+        .chat-sidebar {
+            width: 300px;
+            background: white;
+            border-right: 1px solid #e1e8ed;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #e1e8ed;
+            background: #f8f9fa;
+        }
+
+        .back-button {
+            display: flex;
+            align-items: center;
+            color: #0071ce;
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            color: #004c91;
+        }
+
+        .back-button::before {
+            content: "←";
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+
+        .agent-info-mini {
+            display: flex;
+            align-items: center;
+        }
+
+        .agent-avatar-mini {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+            margin-right: 12px;
+        }
+
+        .agent-details-mini h3 {
+            font-size: 1.1rem;
+            margin-bottom: 2px;
+            color: #1a202c;
+        }
+
+        .agent-status-mini {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .status-dot-mini {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #10b981;
+            margin-right: 5px;
+        }
+
+        .conversations-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .conversations-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .conversation-item {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .conversation-item:hover {
+            background: #f8f9fa;
+            border-color: #e1e8ed;
+        }
+
+        .conversation-item.active {
+            background: #f0f8ff;
+            border-color: #0071ce;
+        }
+
+        .conversation-preview {
+            font-size: 0.9rem;
+            color: #333;
+            margin-bottom: 4px;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .conversation-time {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .new-chat-btn {
+            margin: 15px;
+            padding: 12px;
+            background: #0071ce;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .new-chat-btn:hover {
+            background: #004c91;
+        }
+
+        /* Main Chat Area */
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        /* Chat Header */
+        .chat-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid #e1e8ed;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .chat-header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .agent-info-header {
+            display: flex;
+            align-items: center;
+        }
+
+        .agent-avatar-header {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            margin-right: 15px;
+        }
+
+        .agent-details-header h2 {
+            font-size: 1.4rem;
+            margin-bottom: 4px;
+            color: #1a202c;
+        }
+
+        .agent-title-header {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+
+        .agent-capabilities-header {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .capability-badge {
+            background: #f0f8ff;
+            color: #0071ce;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: #f8f9fa;
+            border: 1px solid #e1e8ed;
+            color: #666;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .action-btn:hover {
+            background: #0071ce;
+            color: white;
+            border-color: #0071ce;
+        }
+
+        /* Messages Area */
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: white;
+            margin: 0 12px;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: #0071ce;
+        }
+
+        .message-content {
+            max-width: 70%;
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .message.user .message-content {
+            background: #0071ce;
+            color: white;
+        }
+
+        .message-text {
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .message-time {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .message.user .message-time {
+            text-align: right;
+        }
+
+        .typing-indicator {
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+            align-items: center;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+            margin-left: 48px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ccc;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% { opacity: 0.3; }
+            40% { opacity: 1; }
+        }
+
+        /* Message Input */
+        .message-input-container {
+            padding: 20px;
+            border-top: 1px solid #e1e8ed;
+            background: white;
+        }
+
+        .message-input-wrapper {
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            max-width: 100%;
+        }
+
+        .message-input {
+            flex: 1;
+            min-height: 44px;
+            max-height: 120px;
+            padding: 12px 16px;
+            border: 1px solid #e1e8ed;
+            border-radius: 22px;
+            resize: none;
+            outline: none;
+            font-size: 1rem;
+            line-height: 1.4;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .message-input:focus {
+            border-color: #0071ce;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(0,113,206,0.1);
+        }
+
+        .send-button {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #0071ce;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .send-button:hover {
+            background: #004c91;
+            transform: scale(1.05);
+        }
+
+        .send-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Welcome Message */
+        .welcome-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .welcome-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            margin: 0 auto 20px;
+        }
+
+        .welcome-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #1a202c;
+        }
+
+        .welcome-description {
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .welcome-suggestions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .suggestion-btn {
+            background: white;
+            border: 1px solid #e1e8ed;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .suggestion-btn:hover {
+            border-color: #0071ce;
+            background: #f0f8ff;
+        }
+
+        /* Enhanced structured data styles */
+        .metrics-container {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #f0f8ff, #e6f3ff);
+            border: 1px solid #0071ce;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .metric-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #0071ce;
+            margin-bottom: 4px;
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .response-text {
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .response-text h3 {
+            color: #1a202c;
+            font-size: 1.2rem;
+            margin: 16px 0 8px 0;
+            padding-bottom: 4px;
+            border-bottom: 2px solid #0071ce;
+        }
+
+        .response-text h2 {
+            color: #1a202c;
+            font-size: 1.4rem;
+            margin: 20px 0 12px 0;
+        }
+
+        .data-table {
+            margin: 16px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .table-title {
+            background: #f8f9fa;
+            padding: 12px 16px;
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1a202c;
+            border-bottom: 1px solid #e1e8ed;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .structured-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .structured-table th {
+            background: #0071ce;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .structured-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .structured-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .structured-table tr:hover {
+            background: #f0f8ff;
+        }
+
+        .chart-container {
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .chart-title {
+            margin: 0 0 16px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1a202c;
+            text-align: center;
+        }
+
+        .chart-canvas {
+            max-width: 100%;
+            height: 300px !important;
+        }
+
+        /* Enhanced message content for agent responses */
+        .message.agent .message-content {
+            max-width: 85%;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .chat-sidebar {
+                width: 100%;
+                position: absolute;
+                z-index: 1000;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .chat-sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            
+            .chat-main {
+                width: 100%;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+
+            .metrics-container {
+                justify-content: center;
+            }
+            
+            .metric-card {
+                min-width: 100px;
+            }
+            
+            .structured-table {
+                font-size: 0.8rem;
+            }
+            
+            .structured-table th,
+            .structured-table td {
+                padding: 8px;
+            }
+            
+            .chart-canvas {
+                height: 250px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <!-- Left Sidebar - Conversation History -->
+        <div class="chat-sidebar" id="chatSidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="back-button">
+                    DASHBOARD
+                </a>
+                <div class="agent-info-mini">
+                    <div class="agent-avatar-mini" id="agentAvatarMini">🤖</div>
+                    <div class="agent-details-mini">
+                        <h3 id="agentNameMini">Agent</h3>
+                        <div class="agent-status-mini">
+                            <div class="status-dot-mini"></div>
+                            Online
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="conversations-list">
+                <div class="conversations-title">Recent Conversations</div>
+                <div id="conversationsList">
+                    <!-- Conversations will be loaded here -->
+                </div>
+            </div>
+            
+            <button class="new-chat-btn" onclick="startNewConversation()">
+                ➕ New Conversation
+            </button>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="chat-main">
+            <!-- Chat Header -->
+            <div class="chat-header">
+                <div class="chat-header-content">
+                    <div class="agent-info-header">
+                        <div class="agent-avatar-header" id="agentAvatarHeader">🤖</div>
+                        <div class="agent-details-header">
+                            <h2 id="agentNameHeader">Agent Name</h2>
+                            <div class="agent-title-header" id="agentTitleHeader">Agent Title</div>
+                            <div class="agent-capabilities-header" id="agentCapabilitiesHeader">
+                                <!-- Capabilities will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-actions">
+                        <button class="action-btn" onclick="configureAgent()" title="Configure Agent">
+                            ⚙️ Configure
+                        </button>
+                        <button class="action-btn" onclick="clearChat()" title="Clear Chat">
+                            🗑️ Clear
+                        </button>
+                        <button class="action-btn" onclick="exportChat()" title="Export Chat">
+                            📤 Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages Container -->
+            <div class="messages-container" id="messagesContainer">
+                <div class="welcome-message" id="welcomeMessage">
+                    <div class="welcome-avatar" id="welcomeAvatar">🤖</div>
+                    <div class="welcome-title" id="welcomeTitle">Hello! I'm your AI Assistant</div>
+                    <div class="welcome-description" id="welcomeDescription">
+                        I'm here to help you with your procurement needs. What would you like assistance with today?
+                    </div>
+                    <div class="welcome-suggestions" id="welcomeSuggestions">
+                        <!-- Suggestions will be loaded here -->
+                    </div>
+                </div>
+                
+                <!-- Typing Indicator -->
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message Input -->
+            <div class="message-input-container">
+                <div class="message-input-wrapper">
+                    <textarea 
+                        class="message-input" 
+                        id="messageInput" 
+                        placeholder="Ask me anything... I'll help you with procurement decisions"
+                        rows="1"
+                        onkeydown="handleKeyPress(event)"
+                    ></textarea>
+                    <button class="send-button" id="sendButton" onclick="sendMessage()">
+                        ➤
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Chart.js for visualization -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+    <script>
+        // Agent configurations
+        const agentConfigs = {
+            wally: {
+                name: 'Wally',
+                title: 'Master Procurement Coordinator',
+                avatar: '🏪',
+                color: '#0071ce',
+                capabilities: ['Query Routing', 'Multi-Agent Coordination', 'Response Synthesis', 'Procurement Expertise'],
+                welcome: "Hello! I'm Wally, your Master Procurement Coordinator. I can help you by routing your requests to specialized agents and coordinating their responses. What would you like assistance with today?",
+                suggestions: [
+                    "Help me find the best suppliers for office equipment",
+                    "Analyze our Q3 procurement spend",
+                    "Review this contract for compliance issues",
+                    "What are the latest trends in sustainable sourcing?"
+                ]
+            },
+            butler: {
+                name: 'Butler',
+                title: 'AI Assistant & Helper',
+                avatar: '🤖',
+                color: '#28a745',
+                capabilities: ['Task Assistance', 'General Queries', 'Process Guidance', 'Documentation'],
+                welcome: "Hello! I'm Butler, your AI Assistant. I'm here to help with various tasks and provide support across different procurement activities.",
+                suggestions: [
+                    "How do I create a purchase order?",
+                    "What's the procurement process for new vendors?",
+                    "Help me understand our approval workflow",
+                    "Show me procurement best practices"
+                ]
+            },
+            catm: {
+                name: 'CatM',
+                title: 'Category Management Specialist',
+                avatar: '📊',
+                color: '#17a2b8',
+                capabilities: ['Category Strategy', 'Market Analysis', 'Supplier Optimization', 'Cost Management'],
+                welcome: "Hello! I'm CatM, your Category Management Specialist. I can help you with category strategies, market analysis, and supplier optimization.",
+                suggestions: [
+                    "Analyze the office supplies category performance",
+                    "What's the market trend for IT hardware?",
+                    "Help optimize our supplier portfolio",
+                    "Create a category sourcing strategy"
+                ]
+            },
+            starsource: {
+                name: 'Starsource',
+                title: 'Strategic Sourcing Specialist',
+                avatar: '🌟',
+                color: '#ffc107',
+                capabilities: ['Global Sourcing', 'Supplier Identification', 'Supply Chain', 'Risk Assessment'],
+                welcome: "Hello! I'm Starsource, your Strategic Sourcing Specialist. I focus on global sourcing opportunities and supply chain optimization.",
+                suggestions: [
+                    "Find suppliers in Asia for electronics",
+                    "Assess supply chain risks for key categories",
+                    "Identify cost-saving sourcing opportunities",
+                    "Evaluate nearshoring vs offshore options"
+                ]
+            },
+            spender: {
+                name: 'Spender',
+                title: 'Analytics & Spend Management',
+                avatar: '💰',
+                color: '#fd7e14',
+                capabilities: ['Spend Analysis', 'Financial Modeling', 'Contract Analytics', 'Performance Metrics'],
+                welcome: "Hello! I'm Spender, your Analytics & Spend Management specialist. I can help analyze spend data and financial performance.",
+                suggestions: [
+                    "Show me our top spending categories",
+                    "Analyze contract utilization rates",
+                    "Create a spend variance report",
+                    "Identify cost-saving opportunities"
+                ]
+            },
+            contra: {
+                name: 'Contra',
+                title: 'Contract Research Specialist',
+                avatar: '📋',
+                color: '#6610f2',
+                capabilities: ['Contract Analysis', 'Template Creation', 'Negotiation', 'Legal Compliance'],
+                welcome: "Hello! I'm Contra, your Contract Research Specialist. I can help with contract analysis, templates, and negotiation strategies.",
+                suggestions: [
+                    "Review this contract for key terms",
+                    "Create a new service agreement template",
+                    "What are standard payment terms?",
+                    "Help negotiate better pricing terms"
+                ]
+            },
+            policy: {
+                name: 'Policy',
+                title: 'Compliance & Governance',
+                avatar: '📜',
+                color: '#e83e8c',
+                capabilities: ['Policy Compliance', 'Governance', 'Regulatory Affairs', 'Audit Support'],
+                welcome: "Hello! I'm Policy, your Compliance & Governance specialist. I ensure adherence to procurement policies and regulatory requirements.",
+                suggestions: [
+                    "Check if this purchase follows policy",
+                    "What are the approval requirements?",
+                    "Review our supplier diversity goals",
+                    "Explain the ethics guidelines"
+                ]
+            },
+            compliance: {
+                name: 'Compliance',
+                title: 'Legal & MSA Templates',
+                avatar: '⚖️',
+                color: '#20c997',
+                capabilities: ['Legal Review', 'MSA Templates', 'Regulatory Compliance', 'Risk Management'],
+                welcome: "Hello! I'm Compliance, your Legal & MSA specialist. I handle legal aspects of procurement and ensure regulatory compliance.",
+                suggestions: [
+                    "Review this MSA for legal issues",
+                    "What are the liability terms?",
+                    "Check regulatory compliance requirements",
+                    "Create a standard legal template"
+                ]
+            },
+            professor: {
+                name: 'Professor',
+                title: 'Research & Intelligence',
+                avatar: '🎓',
+                color: '#6f42c1',
+                capabilities: ['Market Research', 'Intelligence Gathering', 'Training', 'Best Practices'],
+                welcome: "Hello! I'm Professor, your Research & Intelligence specialist. I provide insights, market intelligence, and educational content.",
+                suggestions: [
+                    "Research market trends for our industry",
+                    "What are procurement best practices?",
+                    "Provide training on supplier management",
+                    "Analyze competitor procurement strategies"
+                ]
+            }
+        };
+
+        let currentAgent = null;
+        let currentConversation = null;
+        let conversations = {};
+
+        // Initialize chat page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            setupMessageInput();
+        });
+
+        function initializePage() {
+            // Get agent ID from URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const agentId = urlParams.get('agent') || 'wally';
+            
+            currentAgent = agentId;
+            
+            // Load agent configuration
+            const config = agentConfigs[agentId];
+            if (config) {
+                loadAgentConfig(config);
+                loadConversations(agentId);
+                startNewConversation();
+            }
+        }
+
+        function loadAgentConfig(config) {
+            // Update all agent displays
+            document.getElementById('agentNameMini').textContent = config.name;
+            document.getElementById('agentAvatarMini').textContent = config.avatar;
+            document.getElementById('agentAvatarMini').style.background = config.color;
+            
+            document.getElementById('agentNameHeader').textContent = config.name;
+            document.getElementById('agentTitleHeader').textContent = config.title;
+            document.getElementById('agentAvatarHeader').textContent = config.avatar;
+            document.getElementById('agentAvatarHeader').style.background = config.color;
+            
+            // Update capabilities
+            const capabilitiesContainer = document.getElementById('agentCapabilitiesHeader');
+            capabilitiesContainer.innerHTML = config.capabilities
+                .map(cap => `<span class="capability-badge">${cap}</span>`)
+                .join('');
+            
+            // Update welcome message
+            document.getElementById('welcomeAvatar').textContent = config.avatar;
+            document.getElementById('welcomeAvatar').style.background = config.color;
+            document.getElementById('welcomeTitle').textContent = `Hello! I'm ${config.name}`;
+            document.getElementById('welcomeDescription').textContent = config.welcome;
+            
+            // Update suggestions
+            const suggestionsContainer = document.getElementById('welcomeSuggestions');
+            suggestionsContainer.innerHTML = config.suggestions
+                .map(suggestion => `
+                    <button class="suggestion-btn" onclick="sendSuggestion('${suggestion}')">
+                        ${suggestion}
+                    </button>
+                `).join('');
+        }
+
+        function loadConversations(agentId) {
+            // Load conversations from localStorage
+            const stored = localStorage.getItem(`conversations_${agentId}`);
+            conversations[agentId] = stored ? JSON.parse(stored) : [];
+            
+            updateConversationsList();
+        }
+
+        function updateConversationsList() {
+            const container = document.getElementById('conversationsList');
+            const agentConversations = conversations[currentAgent] || [];
+            
+            if (agentConversations.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">No conversations yet</div>';
+                return;
+            }
+            
+            container.innerHTML = agentConversations
+                .slice(-10) // Show last 10 conversations
+                .reverse()
+                .map((conv, index) => `
+                    <div class="conversation-item ${conv.id === currentConversation ? 'active' : ''}" 
+                         onclick="loadConversation('${conv.id}')">
+                        <div class="conversation-preview">${conv.preview}</div>
+                        <div class="conversation-time">${formatTime(conv.lastMessage)}</div>
+                    </div>
+                `).join('');
+        }
+
+        function startNewConversation() {
+            currentConversation = `conv_${Date.now()}`;
+            
+            // Clear messages and show welcome
+            const container = document.getElementById('messagesContainer');
+            container.innerHTML = `
+                <div class="welcome-message">
+                    <div class="welcome-avatar" id="welcomeAvatar">${agentConfigs[currentAgent].avatar}</div>
+                    <div class="welcome-title">Hello! I'm ${agentConfigs[currentAgent].name}</div>
+                    <div class="welcome-description">${agentConfigs[currentAgent].welcome}</div>
+                    <div class="welcome-suggestions">
+                        ${agentConfigs[currentAgent].suggestions.map(suggestion => `
+                            <button class="suggestion-btn" onclick="sendSuggestion('${suggestion}')">
+                                ${suggestion}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            `;
+            
+            // Apply agent styling
+            const avatar = document.getElementById('welcomeAvatar');
+            avatar.style.background = agentConfigs[currentAgent].color;
+            
+            updateConversationsList();
+        }
+
+        function setupMessageInput() {
+            const messageInput = document.getElementById('messageInput');
+            
+            // Auto-resize textarea
+            messageInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            });
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function sendSuggestion(suggestion) {
+            document.getElementById('messageInput').value = suggestion;
+            sendMessage();
+        }
+
+        // ENHANCED SEND MESSAGE WITH STRUCTURED DATA SUPPORT AND DEBUG
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (!message) return;
+            
+            // Clear input
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            
+            // Hide welcome message
+            const welcomeMessage = document.querySelector('.welcome-message');
+            if (welcomeMessage) {
+                welcomeMessage.remove();
+            }
+            
+            // Add user message
+            addMessage('user', message);
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            try {
+                const endpoint = `http://localhost:8000/chat/${currentAgent}`;
+                console.log('🔍 DEBUG: Calling endpoint:', endpoint);
+                console.log('🔍 DEBUG: Current agent:', currentAgent);
+                
+                // Send to backend
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        agent_id: currentAgent
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // DEBUG: Log everything
+                console.log('🔍 DEBUG: Full response:', data);
+                console.log('🔍 DEBUG: structured_data exists:', !!data.structured_data);
+                console.log('🔍 DEBUG: structured_data value:', data.structured_data);
+                
+                if (data.structured_data) {
+                    console.log('✅ DEBUG: Structured data found!');
+                    console.log('📊 Tables:', data.structured_data.tables?.length || 0);
+                    console.log('📈 Charts:', data.structured_data.charts?.length || 0);
+                    console.log('💰 Metrics:', data.structured_data.metrics?.length || 0);
+                } else {
+                    console.log('❌ DEBUG: No structured data in response');
+                }
+                
+                // Hide typing indicator
+                hideTypingIndicator();
+                
+                // ALWAYS use the enhanced message function
+                console.log('🔍 DEBUG: Calling addEnhancedMessage');
+                addEnhancedMessage('agent', data.response || 'Sorry, I encountered an error. Please try again.', data.structured_data);
+                
+                // Save conversation WITH structured data
+                saveConversation(message, data.response || 'Error occurred', data.structured_data);
+                
+            } catch (error) {
+                hideTypingIndicator();
+                addMessage('agent', 'Sorry, I\'m having trouble connecting. Please check your connection and try again.');
+                console.error('❌ Chat error:', error);
+            }
+        }
+
+        function addEnhancedMessage(sender, text, structuredData) {
+            console.log('🔍 DEBUG: addEnhancedMessage called for', sender);
+            console.log('🔍 DEBUG: structuredData in addEnhancedMessage:', !!structuredData);
+            
+            const container = document.getElementById('messagesContainer');
+            const config = agentConfigs[currentAgent];
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const avatar = sender === 'user' ? '👤' : config.avatar;
+            const avatarColor = sender === 'user' ? '#0071ce' : config.color;
+            
+            // Process structured data if available
+            let enhancedContent = formatMessageContent(text, structuredData);
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar" style="background: ${avatarColor}">
+                    ${avatar}
+                </div>
+                <div class="message-content">
+                    <div class="message-text">${enhancedContent}</div>
+                    <div class="message-time">${formatTime(new Date())}</div>
+                </div>
+            `;
+            
+            // Insert before typing indicator
+            const typingIndicator = document.getElementById('typingIndicator');
+            container.insertBefore(messageDiv, typingIndicator);
+            
+            // Render charts if any
+            if (structuredData && structuredData.charts) {
+                console.log('🔍 DEBUG: Rendering charts:', structuredData.charts.length);
+                setTimeout(() => renderCharts(structuredData.charts, messageDiv), 100);
+            }
+            
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function formatMessageContent(text, structuredData) {
+            console.log('🔍 DEBUG: formatMessageContent called');
+            console.log('🔍 DEBUG: text length:', text?.length || 0);
+            console.log('🔍 DEBUG: structuredData:', structuredData);
+            console.log('🔍 DEBUG: structuredData is null/undefined:', !structuredData);
+            
+            if (!structuredData) {
+                console.log('⚠️ DEBUG: No structured data, using cleanMarkdown');
+                return cleanMarkdown(text);
+            }
+            
+            console.log('✅ DEBUG: Processing structured data!');
+            console.log('🔍 DEBUG: Tables available:', structuredData.tables?.length || 0);
+            console.log('🔍 DEBUG: Charts available:', structuredData.charts?.length || 0);
+            console.log('🔍 DEBUG: Metrics available:', structuredData.metrics?.length || 0);
+            
+            let content = '';
+            
+            // Add metrics at the top
+            if (structuredData.metrics && structuredData.metrics.length > 0) {
+                console.log('💰 DEBUG: Adding', structuredData.metrics.length, 'metrics');
+                content += '<div class="metrics-container">';
+                structuredData.metrics.forEach(metric => {
+                    content += `<div class="metric-card">
+                        <div class="metric-value">${metric.value}</div>
+                        <div class="metric-label">${metric.label}</div>
+                    </div>`;
+                });
+                content += '</div>';
+            }
+            
+            // Add main text (cleaned) - but hide the markdown table parts
+            const cleanedText = cleanMarkdown(text);
+            content += `<div class="response-text">${cleanedText}</div>`;
+            
+            // Add structured tables
+            if (structuredData.tables && structuredData.tables.length > 0) {
+                console.log('📊 DEBUG: Adding', structuredData.tables.length, 'structured tables');
+                structuredData.tables.forEach((table, index) => {
+                    console.log(`📊 DEBUG: Processing table ${index}:`, table.title, 'with', table.rows?.length, 'rows');
+                    content += formatTable(table);
+                });
+            }
+            
+            // Add chart containers
+            if (structuredData.charts && structuredData.charts.length > 0) {
+                console.log('📈 DEBUG: Adding', structuredData.charts.length, 'chart containers');
+                structuredData.charts.forEach(chart => {
+                    content += `<div class="chart-container">
+                        <h4 class="chart-title">${chart.title}</h4>
+                        <canvas id="chart-${chart.id}" class="chart-canvas"></canvas>
+                    </div>`;
+                });
+            }
+            
+            console.log('✅ DEBUG: Final formatted content length:', content.length);
+            return content;
+        }
+
+        function cleanMarkdown(text) {
+            return text
+                .replace(/###\s*(.*?)$/gm, '<h3>$1</h3>')
+                .replace(/##\s*(.*?)$/gm, '<h2>$1</h2>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/^\s*(.+)/, '<p>$1')
+                .replace(/(.+)\s*$/, '$1</p>')
+                // Remove the entire markdown table section to avoid duplication
+                .replace(/\|.*?\|\n\|[-\s\|:]+\|\n(?:\|.*?\|\n)*/g, '');
+        }
+
+        function formatTable(table) {
+            console.log('📊 DEBUG: Formatting table:', table.title, 'with', table.rows?.length, 'rows');
+            
+            let tableHtml = `<div class="data-table">
+                <h4 class="table-title">${table.title}</h4>
+                <div class="table-wrapper">
+                    <table class="structured-table">
+                        <thead>
+                            <tr>`;
+            
+            // Add headers
+            table.headers.forEach(header => {
+                tableHtml += `<th>${header}</th>`;
+            });
+            
+            tableHtml += `</tr></thead><tbody>`;
+            
+            // Add rows
+            table.rows.forEach(row => {
+                tableHtml += '<tr>';
+                row.forEach(cell => {
+                    tableHtml += `<td>${cell}</td>`;
+                });
+                tableHtml += '</tr>';
+            });
+            
+            tableHtml += `</tbody></table></div></div>`;
+            
+            return tableHtml;
+        }
+
+        function renderCharts(charts, messageElement) {
+            charts.forEach(chartConfig => {
+                const canvas = messageElement.querySelector(`#chart-${chartConfig.id}`);
+                if (!canvas) {
+                    console.log('❌ DEBUG: Canvas not found for chart:', chartConfig.id);
+                    return;
+                }
+                
+                console.log('📈 DEBUG: Rendering chart:', chartConfig.type, chartConfig.title);
+                const ctx = canvas.getContext('2d');
+                
+                let chartData, chartOptions;
+                
+                switch (chartConfig.type) {
+                    case 'bar':
+                        chartData = {
+                            labels: chartConfig.data.map(item => item.name),
+                            datasets: [{
+                                label: chartConfig.y_axis || 'Value',
+                                data: chartConfig.data.map(item => item.value),
+                                backgroundColor: '#0071ce',
+                                borderColor: '#004c91',
+                                borderWidth: 1
+                            }]
+                        };
+                        chartOptions = {
+                            responsive: true,
+                            plugins: {
+                                legend: { display: false }
+                            },
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        };
+                        break;
+                        
+                    case 'pie':
+                        chartData = {
+                            labels: chartConfig.data.map(item => item.name),
+                            datasets: [{
+                                data: chartConfig.data.map(item => item.value),
+                                backgroundColor: [
+                                    '#0071ce', '#004c91', '#17a2b8', '#28a745', 
+                                    '#ffc107', '#fd7e14', '#e83e8c', '#6f42c1'
+                                ]
+                            }]
+                        };
+                        chartOptions = {
+                            responsive: true,
+                            plugins: {
+                                legend: { position: 'bottom' }
+                            }
+                        };
+                        break;
+                        
+                    case 'line':
+                        chartData = {
+                            labels: chartConfig.data.map(item => item.name),
+                            datasets: [{
+                                label: chartConfig.y_axis || 'Value',
+                                data: chartConfig.data.map(item => item.value),
+                                borderColor: '#0071ce',
+                                backgroundColor: 'rgba(0, 113, 206, 0.1)',
+                                tension: 0.4
+                            }]
+                        };
+                        chartOptions = {
+                            responsive: true,
+                            plugins: {
+                                legend: { display: false }
+                            },
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        };
+                        break;
+                }
+                
+                try {
+                    new Chart(ctx, {
+                        type: chartConfig.type,
+                        data: chartData,
+                        options: chartOptions
+                    });
+                    console.log('✅ DEBUG: Chart rendered successfully:', chartConfig.id);
+                } catch (error) {
+                    console.error('❌ DEBUG: Chart rendering error:', error);
+                }
+            });
+        }
+
+        // Fallback addMessage function for simple messages
+        function addMessage(sender, text) {
+            console.log('🔍 DEBUG: Simple addMessage called for', sender);
+            addEnhancedMessage(sender, text, null);
+        }
+
+        function showTypingIndicator() {
+            document.getElementById('typingIndicator').classList.add('active');
+            const container = document.getElementById('messagesContainer');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            document.getElementById('typingIndicator').classList.remove('active');
+        }
+
+        function saveConversation(userMessage, agentResponse, structuredData = null) {
+            if (!conversations[currentAgent]) {
+                conversations[currentAgent] = [];
+            }
+            
+            // Find or create current conversation
+            let conversation = conversations[currentAgent].find(conv => conv.id === currentConversation);
+            if (!conversation) {
+                conversation = {
+                    id: currentConversation,
+                    preview: userMessage.substring(0, 50) + (userMessage.length > 50 ? '...' : ''),
+                    messages: [],
+                    lastMessage: new Date()
+                };
+                conversations[currentAgent].push(conversation);
+            }
+            
+            // Add user message
+            conversation.messages.push({
+                sender: 'user',
+                text: userMessage,
+                timestamp: new Date()
+            });
+            
+            // Add agent message with structured data
+            conversation.messages.push({
+                sender: 'agent',
+                text: agentResponse,
+                timestamp: new Date(),
+                structured_data: structuredData // ✅ Save structured data with the message
+            });
+            
+            conversation.lastMessage = new Date();
+            
+            // Save to localStorage
+            localStorage.setItem(`conversations_${currentAgent}`, JSON.stringify(conversations[currentAgent]));
+            
+            // Update conversations list
+            updateConversationsList();
+        }
+
+        function loadConversation(conversationId) {
+            currentConversation = conversationId;
+            const conversation = conversations[currentAgent].find(conv => conv.id === conversationId);
+            
+            if (!conversation) return;
+            
+            // Clear messages container
+            const container = document.getElementById('messagesContainer');
+            container.innerHTML = '<div class="typing-indicator" id="typingIndicator"><div class="typing-dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>';
+            
+            // Add all messages with their structured data
+            conversation.messages.forEach((msg, index) => {
+                if (msg.sender === 'agent' && msg.structured_data) {
+                    // Agent message with structured data - use enhanced rendering
+                    addEnhancedMessage(msg.sender, msg.text, msg.structured_data);
+                } else {
+                    // Regular message
+                    addMessage(msg.sender, msg.text);
+                }
+            });
+            
+            // Update active conversation in list
+            updateConversationsList();
+        }
+
+        function formatTime(date) {
+            if (typeof date === 'string') date = new Date(date);
+            return date.toLocaleString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
+
+        function configureAgent() {
+            // Open configuration modal or navigate to config page
+            alert(`Configuration for ${agentConfigs[currentAgent].name} will be implemented in the next step!`);
+        }
+
+        function clearChat() {
+            if (confirm('Are you sure you want to clear this chat?')) {
+                startNewConversation();
+            }
+        }
+
+        function exportChat() {
+            const conversation = conversations[currentAgent]?.find(conv => conv.id === currentConversation);
+            if (!conversation || !conversation.messages.length) {
+                alert('No messages to export');
+                return;
+            }
+            
+            const chatText = conversation.messages.map(msg => 
+                `${msg.sender === 'user' ? 'You' : agentConfigs[currentAgent].name}: ${msg.text}`
+            ).join('\n\n');
+            
+            const blob = new Blob([chatText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `chat_${agentConfigs[currentAgent].name}_${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Mobile menu toggle
+        function toggleMobileSidebar() {
+            document.getElementById('chatSidebar').classList.toggle('mobile-open');
+        }
+
+        // Add mobile menu button for small screens
+        if (window.innerWidth <= 768) {
+            document.querySelector('.chat-header-content').insertAdjacentHTML('afterbegin', 
+                '<button class="action-btn" onclick="toggleMobileSidebar()" style="margin-right: 10px;">☰</button>'
+            );
+        }
+    </script>
+</body>
+</html>
